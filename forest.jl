@@ -23,7 +23,7 @@ function forest_fire(; density = 0.45, griddims = (5, 5))
 
     for pos in positions(forest)
         if rand(Uniform(0,1)) < density
-            tree = add_agent!(I, forest)
+            tree = add_agent!(pos, forest)
             if pos[1] == 1
                 tree.status = burning
             end
