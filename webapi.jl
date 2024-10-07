@@ -8,8 +8,9 @@ route("/simulations", method = POST) do
     payload = jsonpayload()
     x = payload["dim"][1]
     y = payload["dim"][2]
+    probability_of_burn = payload["probSpread"]
 
-    model = forest_fire(griddims=(x,y))
+    model = forest_fire(griddims=(x,y), probability_of_spread = probability_of_burn)
     id = string(uuid1())
     instances[id] = model
 
@@ -38,4 +39,4 @@ Genie.config.cors_headers["Access-Control-Allow-Headers"] = "Content-Type"
 Genie.config.cors_headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS" 
 Genie.config.cors_allowed_origins = ["*"]
 
-up()
+up(8080)
