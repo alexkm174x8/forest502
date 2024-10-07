@@ -9,9 +9,9 @@ function App() {
 
   const burntTrees = useRef(null);
   let [location, setLocation] = useState("");
-  let [gridSize, setGridSize] = useState(20);
-  let [simSpeed, setSimSpeed] = useState(2);
-  let [simSpread, setSimspread] = useState(50);
+  let [gridSize, setGridSize] = useState(0);
+  let [simSpeed, setSimSpeed] = useState(0);
+  let [simSpread, setSimspread] = useState(0);
   let [trees, setTrees] = useState([]);
 
   const running = useRef(null);
