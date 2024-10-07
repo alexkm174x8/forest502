@@ -9,7 +9,9 @@ route("/simulations", method = POST) do
     x = payload["dim"][1]
     y = payload["dim"][2]
     burn_trees = payload["burn_trees"]
+    
     density_trees = payload["density_trees"]
+    #modificaciones 
 
     model = forest_fire(density_trees, griddims=(x,y), probability_of_spread = burn_trees)
     id = string(uuid1())
