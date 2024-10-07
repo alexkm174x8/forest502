@@ -16,6 +16,7 @@ function App() {
   let [simSpread, setSimspread] = useState(50);
   let [simsouthWind, setSimsouthWind] = useState(0);
   let [simwestWind, setSimwestWind] = useState(0);
+  let[simbigJumps, setSimbigJumps] = useState(0);
 
   let [trees, setTrees] = useState([]);
 
@@ -25,7 +26,7 @@ function App() {
     fetch("http://localhost:8000/simulations", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dim: [gridSize, gridSize], density: simDensity, spread: simSpread, winds: [simsouthWind, simwestWind]})
+      body: JSON.stringify({ dim: [gridSize, gridSize], density: simDensity, spread: simSpread, winds: [simsouthWind, simwestWind], jumps: simbigJumps})
     }).then(resp => resp.json())
     .then(data => {
       setLocation(data["Location"]);
@@ -75,7 +76,8 @@ function App() {
       <SliderField label="Probability of spread" min={0} max={100} step={1} value={simSpread} onChange={setSimspread} />
       <SliderField label="South wind speed" min={-50} max={50} step={1} value={simsouthWind} onChange={setSimsouthWind} />
       <SliderField label="West wind speed" min={-50} max={50} step={1} value={simwestWind} onChange={setSimwestWind} />
-      
+      <SliderField label="Big Jumps" min={0} max={1} step={1} value={simbigJumps} onChange={setSimbigJumps} />
+
       <svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor:"white"}}>
       {
         trees.map(tree =>
