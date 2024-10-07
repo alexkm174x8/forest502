@@ -1,6 +1,3 @@
-
-// import { Button, ButtonGroup } from '@aws-amplify/ui-react';
-// Replace the following line (the idea is to add SliderField to the set of imported components)
 import { Button, ButtonGroup, SliderField } from '@aws-amplify/ui-react';
 import { useRef, useState } from 'react'
 
@@ -10,14 +7,13 @@ import Plotly from 'plotly.js/dist/plotly';
 
 function App() {
 
-  //Added const
+
   const burntTrees = useRef(null);
   let [location, setLocation] = useState("");
-  // let gridSize = 5;
-  // Replace gridSize with the pair of React state management functions
   let [gridSize, setGridSize] = useState(20);
-  // Added speed variable
   let [simSpeed, setSimSpeed] = useState(2);
+  let [simDensity, setSimDensity] = useState(0.6);
+  let [simSpread, setSimspread] = useState(50);
   let [trees, setTrees] = useState([]);
 
   const running = useRef(null);
@@ -26,7 +22,7 @@ function App() {
     fetch("http://localhost:8000/simulations", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dim: [gridSize, gridSize] })
+      body: JSON.stringify({ dim: [gridSize, gridSize], density: simDensity, spread: simSpread })
     }).then(resp => resp.json())
     .then(data => {
       setLocation(data["Location"]);
@@ -72,6 +68,8 @@ function App() {
       // Add the React componet to handle the slider
       <SliderField label="Simulation Speed" min={1} max={40} step={2} value={simSpeed} onChange={setSimSpeed} />
       <SliderField label="Grid size" min={10} max={40} step={10} value={gridSize} onChange={setGridSize} />
+      <SliderField label="Density size" min={0.1} max={0.9} step={0.05} value={simDensity} onChange={setSimDensity} />
+      <SliderField label="Probability of spread" min={0} max={100} step={1} value={simSpread} onChange={setSimspread} />
 
       <svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor:"white"}}>
       {

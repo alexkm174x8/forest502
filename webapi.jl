@@ -8,8 +8,12 @@ route("/simulations", method = POST) do
     payload = jsonpayload()
     x = payload["dim"][1]
     y = payload["dim"][2]
+    # Added density receiver
+    density= payload["density"]
+    probability_of_spread = payload["spread"]
 
-    model = forest_fire(griddims=(x,y))
+    # Added density to model parse
+    model = forest_fire(density = density, griddims=(x,y), probability_of_spread = probability_of_spread)
     id = string(uuid1())
     instances[id] = model
 
