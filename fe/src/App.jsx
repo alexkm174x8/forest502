@@ -20,7 +20,7 @@ function App() {
     fetch("http://localhost:8080/simulations", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dim: [gridSize, gridSize], probSpread: simSpread })
+      body: JSON.stringify({ dim: [gridSize, gridSize], probSpread: simSpread, southWindSpeed: southWindSpeed, westWindSpeed: westWindSpeed })
     }).then(resp => resp.json())
     .then(data => {
       setLocation(data["Location"]);
@@ -63,7 +63,11 @@ function App() {
       </ButtonGroup>
       <SliderField label="Simulation Speed" min={1} max={40} step={2} value={simSpeed} onChange={setSimSpeed} />
       <SliderField label="Grid size" min={10} max={40} step={10} value={gridSize} onChange={setGridSize} />
-      <SliderField label="Probability of spread" min={0} max={100} step={1} value={simSpread} onChange={setSimspread} />
+      
+    <SliderField label="Probability of spread" min={0} max={100} step={1} value={simSpread} onChange={setSimspread} />
+    <SliderField label="South Wind Speed" min={-50} max={50} step={1} value={southWindSpeed} onChange={setSouthWindSpeed} />
+    <SliderField label="West Wind Speed" min={-50} max={50} step={1} value={westWindSpeed} onChange={setWestWindSpeed} />
+    
 
       <svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor:"white"}}>
       {
