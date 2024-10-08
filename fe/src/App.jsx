@@ -1,97 +1,74 @@
-
-// import { Button, ButtonGroup } from '@aws-amplify/ui-react';
-// Replace the following line (the idea is to add SliderField to the set of imported components)
 import { Button, ButtonGroup, SliderField } from '@aws-amplify/ui-react';
-import { useRef, useState } from 'react'
-
+import { useRef, useState } from 'react';
 import '@aws-amplify/ui-react/styles.css';
-
 import Plotly from 'plotly.js/dist/plotly';
 
 function App() {
-
-  //Added const
-  const burntTrees = useRef(null);
+  const burntTrees = useRef([]);
   let [location, setLocation] = useState("");
-  // let gridSize = 5;
-  // Replace gridSize with the pair of React state management functions
   let [gridSize, setGridSize] = useState(20);
-  // Added speed variable
   let [simSpeed, setSimSpeed] = useState(2);
+  let [simDensity, setSimDensity] = useState(0.6);
+  let [simSpread, setSimSpread] = useState(50);
+  let [southWind, setSouthWind] = useState(0);
+  let [westWind, setWestWind] = useState(0);
   let [trees, setTrees] = useState([]);
 
   const running = useRef(null);
 
-  let setup = () => {
+  const setup = () => {
     fetch("http://localhost:8000/simulations", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dim: [gridSize, gridSize] })
+      body: JSON.stringify({ dim: [gridSize, gridSize], density: simDensity, spread: simSpread, winds: [southWind, westWind] })
     }).then(resp => resp.json())
     .then(data => {
       setLocation(data["Location"]);
       setTrees(data["trees"]);
     });
-  }
-  
-  let handleStart = () => {
-    // Added array
+  };
+
+  const handleStart = () => {
     burntTrees.current = [];
     running.current = setInterval(() => {
       fetch("http://localhost:8000" + location)
       .then(res => res.json())
       .then(data => {
-        // Added 2 lines
-        let burnt = data["trees"].filter(t => t.status == "burnt").length / data["trees"].length;
+        let burnt = data["trees"].filter(t => t.status === "burnt").length / data["trees"].length;
         burntTrees.current.push(burnt);
         setTrees(data["trees"]);
       });
-      }, 1000 / simSpeed);
+    }, 1000 / simSpeed);
   };
 
-  let handleStop = () => {
+  const handleStop = () => {
     clearInterval(running.current);
     Plotly.newPlot('mydiv', [{
       y: burntTrees.current,
-      mode: 'lines',
-      line: {color: '#80CAF6'}
+      mode: 'lines+markers',
+      type: 'scatter',
+      line: { color: '#FF5733' }
     }]);
   };
 
-  let burning = trees.filter(t => t.status == "burning").length;
-  if (burning == 0) handleStop();
-  let offset = (500 - gridSize * 12) / 2;
-
   return (
-    <>
-      <ButtonGroup variation="primary">
-        <Button onClick={setup}>Setup</Button>
-        <Button onClick={handleStart}>Start</Button>
-        <Button onClick={handleStop}>Stop</Button>
+    <div>
+      <h1>Forest Fire Simulation</h1>
+      <ButtonGroup>
+        <Button onClick={setup}>Initialize</Button>
+        <Button onClick={handleStart}>Begin</Button>
+        <Button onClick={handleStop}>Halt</Button>
       </ButtonGroup>
-      // Add the React componet to handle the slider
-      <SliderField label="Simulation Speed" min={1} max={40} step={2} value={simSpeed} onChange={setSimSpeed} />
-      <SliderField label="Grid size" min={10} max={40} step={10} value={gridSize} onChange={setGridSize} />
+      <SliderField label="Simulation Speed" min={1} max={40} step={1} value={simSpeed} onChange={setSimSpeed} />
+      <SliderField label="Grid Size" min={10} max={50} step={5} value={gridSize} onChange={setGridSize} />
+      <SliderField label="Tree Density" min={0.1} max={0.9} step={0.05} value={simDensity} onChange={setSimDensity} />
+      <SliderField label="Spread Probability" min={0} max={100} step={1} value={simSpread} onChange={setSimSpread} />
+      <SliderField label="South Wind Speed" min={-50} max={50} step={1} value={southWind} onChange={setSouthWind} />
+      <SliderField label="West Wind Speed" min={-50} max={50} step={1} value={westWind} onChange={setWestWind} />
 
-      <svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor:"white"}}>
-      {
-        trees.map(tree =>
-          <image
-            key={tree["id"]}
-            x={offset + 12*(tree["pos"][0] - 1)}
-            y={offset + 12*(tree["pos"][1] - 1)}
-            width={15} href={
-              tree["status"] === "green" ? "./greentree.svg" :
-              (tree["status"] === "burning" ? "./burningtree.svg" :
-                "./burnttree.svg")
-            }
-          />
-        )
-      }
-      </svg>
-
-    </>
-  )
+      <div id="mydiv" style={{ width: '100%', height: '400px' }}></div>
+    </div>
+  );
 }
 
-export default App
+export default App;
