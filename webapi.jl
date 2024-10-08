@@ -9,32 +9,32 @@ route("/simulations", method = POST) do
     x = payload["dim"][1]
     y = payload["dim"][2]
   
-    density = payload["density"]
-    spread_probability = payload["spread"]
-    south_wind = payload["winds"][1]
-    west_wind = payload["winds"][2]
+    density= payload["density"]
+    probability_of_spread = payload["spread"]
+    south_wind_speed = payload["winds"][1]
+    west_wind_speed = payload["winds"][2]
 
-    model = forest_fire(density = density, griddims=(x, y), spread_probability = spread_probability, south_wind = south_wind, west_wind = west_wind)
+    model = forest_fire(density = density, griddims=(x,y), probability_of_spread = probability_of_spread, south_wind_speed = south_wind_speed, west_wind_speed = west_wind_speed)
     id = string(uuid1())
     instances[id] = model
 
-    tree_list = []
+    trees = []
     for tree in allagents(model)
-        push!(tree_list, tree)
+        push!(trees, tree)
     end
     
-    json(Dict(:msg => "Simulation started", "Location" => "/simulations/$id", "trees" => tree_list))
+    json(Dict(:msg => "Hola", "Location" => "/simulations/$id", "trees" => trees))
 end
 
 route("/simulations/:id") do
     model = instances[payload(:id)]
     run!(model, 1)
-    tree_list = []
+    trees = []
     for tree in allagents(model)
-        push!(tree_list, tree)
+        push!(trees, tree)
     end
     
-    json(Dict(:msg => "Simulation updated", "trees" => tree_list))
+    json(Dict(:msg => "Adios", "trees" => trees))
 end
 
 Genie.config.run_as_server = true

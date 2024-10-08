@@ -4,34 +4,34 @@ using Agents, Random, Distributions
 
 @agent struct TreeAgent(GridAgent{2})
     status::TreeStatus = green
-    spread_rate = 0
-    southWind_speed = 0
-    westWind_speed = 0
+    spread = 0
+    southWind = 0
+    westWind = 0
 end
 
 function forest_step(tree::TreeAgent, model)
     if tree.status == burning
-        neighboringTrees = nearby_agents(tree, model, 1) 
+        posibleTrees = nearby_agents(tree, model, 1)
         
-        wind_effects = Dict(
-            (-1, -1) => (-tree.southWind_speed / 2 - tree.westWind_speed / 2),
-            (0, -1)  => (-tree.southWind_speed),
-            (1, -1)  => (-tree.southWind_speed / 2 + tree.westWind_speed / 2),
-            (-1, 0)  => (-tree.westWind_speed),
-            (1, 0)   => tree.westWind_speed,
-            (-1, 1)  => (tree.southWind_speed / 2 - tree.westWind_speed / 2),
-            (0, 1)   => tree.southWind_speed,
-            (1, 1)   => (tree.southWind_speed / 2 + tree.westWind_speed / 2)
+        wind_adjustments = Dict(
+            (-1, -1) => (-tree.southWind / 2 - tree.westWind / 2),
+            (0, -1)  => (-tree.southWind),
+            (1, -1)  => (-tree.southWind / 2 + tree.westWind / 2),
+            (-1, 0)  => (-tree.westWind),
+            (1, 0)   => tree.westWind,
+            (-1, 1)  => (tree.southWind / 2 - tree.westWind / 2),
+            (0, 1)   => tree.southWind,
+            (1, 1)   => (tree.southWind / 2 + tree.westWind / 2)
         )
         
-        for neighbor in neighboringTrees
+        for neighbor in posibleTrees
             relative_pos = (neighbor.pos[1] - tree.pos[1], neighbor.pos[2] - tree.pos[2])
-            spread_modification = get(wind_effects, relative_pos, 0)
-            effective_spread = tree.spread_rate + spread_modification
-            effective_spread = clamp(effective_spread, 0, 100) 
-            spread_chance = rand(0:100)
+            spread_adjustment = get(wind_adjustments, relative_pos, 0)
+            adjusted_spread = tree.spread + spread_adjustment
+            adjusted_spread = clamp(adjusted_spread, 0, 100)
+            posibility_of_spread = rand(0:100)
             
-            if neighbor.status == green && spread_chance < effective_spread
+            if neighbor.status == green && posibility_of_spread < adjusted_spread
                 neighbor.status = burning
             end
         end
@@ -40,16 +40,16 @@ function forest_step(tree::TreeAgent, model)
     end
 end
 
-function forest_fire(; density = 0.70, griddims = (5, 5), spread_probability = 0, south_wind = 0, west_wind = 0)
+function forest_fire(; density = 0.70, griddims = (5, 5), probability_of_spread = 0, south_wind_speed = 0, west_wind_speed = 0)
     space = GridSpaceSingle(griddims; periodic = false, metric = :euclidean)
     forest = StandardABM(TreeAgent, space; agent_step! = forest_step, scheduler = Schedulers.Randomly())
     
     for pos in positions(forest)
         if rand(0:100) < density * 100 
             tree = add_agent!(pos, forest)
-            tree.spread_rate = spread_probability
-            tree.southWind_speed = -south_wind
-            tree.westWind_speed = west_wind
+            tree.spread = probability_of_spread
+            tree.southWind = -south_wind_speed
+            tree.westWind = west_wind_speed
 
             if pos[1] == 5 
                 tree.status = burning
